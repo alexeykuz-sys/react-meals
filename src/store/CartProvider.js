@@ -1,9 +1,9 @@
 import { useReducer } from "react";
 import CartContext from "./cart-context";
 
-// add outside component function because this function wont need anything from that compenent and shouldnt be recreated everytime 
+// add cartREducer outside component function because this function wont need anything from that compenent and shouldnt be recreated everytime 
 // the component is reevaluated.
-// station object - the last state snapshot of the state managed by the reducer
+// state object - the last state snapshot of the state managed by the reducer
 // action is despatch by us in the code
 
 const defaultCartState ={
@@ -14,6 +14,7 @@ const defaultCartState ={
 const cartReducer = (state, action) => {
     if(action.type === 'ADD'){
         // concat js function that adds item to the array and returns a new array, ie returns a new state of the item
+        // updates states in immutable way.
         const updatedItems = state.items.concat(action.item);
         const updatedTotalAmount = state.totalAmount + action.item.price * action.item.amount;
         return {
@@ -24,24 +25,27 @@ const cartReducer = (state, action) => {
     return defaultCartState
 };
 
+// CartProvider manages cartcontet to data amd provide that context to all components that want access to it. 
 const CartProvider = props=>{
-
+    // useReducer returns an array with 2 elements:state snapshop + function to dispatch the action to reducer
     const [cartState, dispatchCartAction] = useReducer(cartReducer, defaultCartState);
 
 
     const addItemToCartHandler = (item)=>{
-        dispatchCartAction({type:'ADD', item:item}) 
+        dispatchCartAction({type:'ADD', item:item})
+        // action is an object, which have property to identify properties to id function
         // convention type and string or CAPS identifier
         // add item to the reducer function we need to forward item to the reducer function => add second property
+        // we have to make sure that addItemToCartHandler is called via addItem in CartContex=>MealItemForm
         
     }
 
     const removeItemFromCartHandler = id => {
         dispatchCartAction({type:'REMOVE', id: id })
     }
-
+    // helper const = object with all the fields we set up in the context itself 
     const cartContext = {
-        item:cartState.items,
+        items:cartState.items,
         totalAmount: cartState.totalAmount,
         addItem: addItemToCartHandler,
         removeItem: removeItemFromCartHandler,
